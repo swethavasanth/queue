@@ -94,5 +94,5 @@ mongoose
   })
   .catch((err) => {
     console.log("MongoDB connection error:", err.message);
-    process.exit(1); // stop so the hosting log shows the real error
+    process.exit(1);
   });
