@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digital Queue - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark mb-4">
+  <div class="container">
+    <span class="navbar-brand">Digital Queue System</span>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-white">Admin Panel</span>
+      <button class="btn btn-light btn-sm" onclick="logout('/admin-login.html')">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card p-4 text-center">
+        <h6 class="text-muted">NOW SERVING</h6>
+        <div class="big-number" id="nowServing">--</div>
+        <button class="btn btn-primary mt-3" onclick="callNext()">Call Next Token</button>
+        <div id="adminMsg" class="mt-2 small"></div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="row g-3">
+        <div class="col-6 col-lg-4"><div class="card p-3 text-center"><h6>Pending</h6><h3 id="cPending">0</h3></div></div>
+        <div class="col-6 col-lg-4"><div class="card p-3 text-center"><h6>Serving</h6><h3 id="cServing">0</h3></div></div>
+        <div class="col-6 col-lg-4"><div class="card p-3 text-center"><h6>Completed</h6><h3 id="cCompleted">0</h3></div></div>
+        <div class="col-6 col-lg-4"><div class="card p-3 text-center"><h6>Cancelled</h6><h3 id="cCancelled">0</h3></div></div>
+        <div class="col-12 col-lg-4"><div class="card p-3 text-center"><h6>Total Today</h6><h3 id="cTotal">0</h3></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-4">
+    <h4>Today's Queue</h4>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead><tr><th>Token</th><th>Name</th><th>Phone</th><th>Service</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="queueBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "digital-queue-management-system",
+  "version": "1.0.0",
+  "description": "Online token and queue management using Node.js, Express and MongoDB",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "mongoose": "^9.0.0"
+  }
+}
