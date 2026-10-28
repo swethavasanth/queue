@@ -5,7 +5,8 @@ const { requireUser, requireAdmin } = require("../middleware/auth");
 const router = express.Router();
 
 const SERVICES = ["General Enquiry", "Billing", "Account Opening", "Complaint"];
-const today = () => new Date().toISOString().slice(0, 10);
+// Today's date in Indian time, e.g. "2026-10-28" (hosting servers run on UTC)
+const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 
 // ---------- USER ROUTES ----------
 

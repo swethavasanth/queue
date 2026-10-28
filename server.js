@@ -11,7 +11,9 @@ const tokenRoutes = require("./routes/tokenRoutes");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
-const MONGO_URL = "mongodb://127.0.0.1:27017/queueDB";
+// On Render, set MONGO_URI to your MongoDB Atlas connection string.
+// On your own computer it falls back to the local MongoDB.
+const MONGO_URL = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/queueDB";
 const PUBLIC = path.join(__dirname, "public");
 const USER_SESSION_COOKIE = "queue.user.sid";
 const ADMIN_SESSION_COOKIE = "queue.admin.sid";
@@ -21,6 +23,7 @@ const SESSION_TTL = 365 * 24 * 60 * 60;
 const ADMIN_EMAIL = "admin@queue.com";
 const ADMIN_PASSWORD = "admin123";
 
+app.set("trust proxy", 1); // Render runs the app behind a proxy
 app.use(express.json());
 
 function createSession(name) {
@@ -89,4 +92,7 @@ mongoose
     await createAdmin();
     app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
   })
-  .catch((err) => console.log("MongoDB connection error:", err.message));
+  .catch((err) => {
+    console.log("MongoDB connection error:", err.message);
+    process.exit(1); // stop so the hosting log shows the real error
+  });
