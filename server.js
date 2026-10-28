@@ -90,9 +90,15 @@ mongoose
   .then(async () => {
     console.log("Connected to MongoDB");
     await createAdmin();
-    app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+
+    if (require.main === module) {
+      app.listen(PORT, () => {
+        console.log(`Server running at http://localhost:${PORT}`);
+      });
+    }
   })
   .catch((err) => {
-    console.log("MongoDB connection error:", err.message);
-    process.exit(1);
+    console.error("MongoDB connection error:", err.message);
   });
+
+module.exports = app;
