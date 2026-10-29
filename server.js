@@ -23,8 +23,45 @@ const SESSION_TTL = 365 * 24 * 60 * 60;
 const ADMIN_EMAIL = "admin@queue.com";
 const ADMIN_PASSWORD = "admin123";
 
-app.set("trust proxy", 1); // Render runs the app behind a proxy
+app.set("trust proxy", 1); // Render / Vercel run the app behind a proxy
 app.use(express.json());
+
+// ---- Database connection ----
+// On Vercel the app starts fresh for requests, so every request waits until
+// MongoDB is connected (the connection is made once and then reused).
+let dbPromise = null;
+function connectDB() {
+  if (!dbPromise) {
+    dbPromise = mongoose
+      .connect(MONGO_URL, { serverSelectionTimeoutMS: 8000 })
+      .then(async () => {
+        console.log("Connected to MongoDB");
+        await createAdmin();
+      })
+      .catch((err) => {
+        dbPromise = null; // try again on the next request
+        throw err;
+      });
+  }
+  return dbPromise;
+}
+
+const NEEDS_DB = (p) => p.startsWith("/api/") || ["/", "/user.html", "/admin.html"].includes(p);
+
+app.use(async (req, res, next) => {
+  if (!NEEDS_DB(req.path)) return next(); // login pages, CSS, JS load without the database
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("MongoDB connection error:", err.message);
+    const msg = process.env.MONGO_URI
+      ? "Cannot connect to the database. Check the MONGO_URI value and MongoDB Atlas Network Access (allow 0.0.0.0/0)."
+      : "MONGO_URI is not set on the server. Add your MongoDB Atlas connection string as an environment variable and redeploy.";
+    if (req.path.startsWith("/api/")) return res.status(503).json({ error: msg });
+    res.status(503).send(msg);
+  }
+});
 
 function createSession(name) {
   return session({
@@ -85,20 +122,22 @@ async function createAdmin() {
   }
 }
 
-mongoose
-  .connect(MONGO_URL)
-  .then(async () => {
-    console.log("Connected to MongoDB");
-    await createAdmin();
+// Any unexpected error -> JSON reply, so the pages can show the message
+app.use((err, req, res, next) => {
+  console.error(err);
+  if (req.path.startsWith("/api/")) return res.status(500).json({ error: "Server error: " + err.message });
+  res.status(500).send("Server error");
+});
 
-    if (require.main === module) {
-      app.listen(PORT, () => {
-        console.log(`Server running at http://localhost:${PORT}`);
-      });
-    }
-  })
-  .catch((err) => {
-    console.error("MongoDB connection error:", err.message);
-  });
+// Running on your own computer / Render: start listening
+if (require.main === module) {
+  connectDB()
+    .then(() => app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`)))
+    .catch((err) => {
+      console.error("MongoDB connection error:", err.message);
+      process.exit(1);
+    });
+}
 
+// Vercel: uses this exported app
 module.exports = app;
